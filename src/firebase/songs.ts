@@ -1,26 +1,35 @@
-import { collection, query, addDoc, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
-import { db } from '../firebase/config'
-import type { Song } from '../types'
+import { db } from '@/firebase/config'
+import {
+  collection,
+  onSnapshot,
+  query,
+  addDoc,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore'
+import type { Song } from '@/types'
 import type { Ref } from 'vue'
 
 const DB_NAME = 'songs'
 
-export const getSongs = (songs: Ref<Song[]>) => {
+export const getSongs = (songs: Ref<Song[]>, isLoading: Ref<boolean>) => {
+  isLoading.value = true
   const q = query(collection(db, DB_NAME))
   onSnapshot(q, (querySnapshot) => {
-    const tempSong: Song[] = []
+    const tempSongs: Song[] = []
     querySnapshot.forEach((doc) => {
-      tempSong.push({ id: doc.id, ...doc.data() } as Song)
+      tempSongs.push({ id: doc.id, ...doc.data() } as Song)
     })
-    songs.value = tempSong
+    songs.value = tempSongs
+    isLoading.value = false
   })
 }
 
-export const addSong = async (songs: Song) => {
+export const addSong = async (song: Song) => {
   await addDoc(collection(db, DB_NAME), {
-    title: songs.title,
-    artist: songs.artist,
-    year: songs.year,
+    title: song.title,
+    artist: song.artist,
+    year: song.year,
   })
 }
 
